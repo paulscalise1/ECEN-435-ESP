@@ -1,92 +1,88 @@
-// ESPNOWv2 JPEG/GPS/PRX Receiver
-// ECEN 435 University of Nebraska–Lincoln
+// Receiver Sketch: Wi-Fi JPEG Receiver Over TCP
+// ECEN 435 University of Nebraska-Lincoln
+// Network parameters come from config.h
 // Author: Paul Scalise
 
+#include "../configuration/config.h"
 #include <WiFi.h>
-#include <esp_now.h>
 #include <strings.h>
-#include <Arduino.h>
-#include <esp_wifi.h>
 
-static const size_t RX_BUFFER_SIZE = 32 * 1024;
-static uint8_t  packetBuf[RX_BUFFER_SIZE];
-static size_t   packetLen = 0;
+// 32 KB buffer for the incoming JPEG or other packet
+static uint8_t packetBuf[32 * 1024];
 
-void printMAC(){
-  uint8_t baseMac[6];
-  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
-  if (ret == ESP_OK) {
-    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
-                  baseMac[0], baseMac[1], baseMac[2],
-                  baseMac[3], baseMac[4], baseMac[5]);
-  } else {
-    Serial.println("*** Failed to read MAC address");
-  }
-}
-
-void ESP_NOW_Init(){
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("*** Error initializing ESP-NOW");
-    while (true) { delay(1000); }
-  }
-  esp_now_register_recv_cb(onDataRecv);
-}
-
-void onDataRecv(const esp_now_recv_info_t* info, const uint8_t* data, int len){
-  if (packetLen + len > RX_BUFFER_SIZE) {
-    packetLen = 0;
-    return;
-  }
-  memcpy(packetBuf + packetLen, data, len);
-  packetLen += len;
-
-  // JPEG frames start “IMG” and end 0xFF 0xD9
-  if (packetLen >= 3 && strncasecmp((const char*)packetBuf, "IMG", 3) == 0) {
-    if (packetLen >= 2 &&
-        packetBuf[packetLen-2] == 0xFF &&
-        packetBuf[packetLen-1] == 0xD9) {
-      Serial.println(F("\n---- BEGIN JPEG HEX DUMP ----"));
-      for (size_t i = 0; i < packetLen; i++) {
-        Serial.printf("%02X ", packetBuf[i]);
-      }
-      Serial.println();
-      Serial.println(F("----  END JPEG HEX DUMP  ----"));
-      Serial.println("Frame done, waiting for next…");
-      packetLen = 0;
-    }
-  }
-  // GPS frames start “GPS” and end with '\n'
-  else if (packetLen >= 3 && strncasecmp((const char*)packetBuf, "GPS", 3) == 0) {
-    if (packetBuf[packetLen-1] == '\n') {
-      Serial.println("Received GPS data:");
-      Serial.write(packetBuf, packetLen);
-      Serial.println("Frame done, waiting for next…");
-      packetLen = 0;
-    }
-  }
-  // Proximity frames start “PRX” and end with '\n'
-  else if (packetLen >= 3 && strncasecmp((const char*)packetBuf, "PRX", 3) == 0) {
-    if (packetBuf[packetLen-1] == '\n') {
-      Serial.println("Received proximity data:");
-      Serial.write(packetBuf, packetLen);
-      Serial.println("Frame done, waiting for next…");
-      packetLen = 0;
-    }
-  }
-  // else: still waiting for more chunks
-}
+WiFiServer tcpServer(DEST_PORT);
 
 void setup() {
   Serial.begin(1000000);
   while (!Serial);
-  ESP_NOW_Init();
-  //printMAC(); // You only need to record this once.
+
+  // set up Soft-AP
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(AP_SSID, AP_PASS, WIFI_CH, /* hidden */0, /* max connections */4);
+  delay(500);
+
+  tcpServer.begin();  // start listening
+
+  Serial.printf("Team %d  AP IP = %s\n",
+                TEAM_ID, WiFi.softAPIP().toString().c_str());
+  Serial.printf("TCP server listening on port %u\n", DEST_PORT);
 }
 
 void loop() {
-  yield();
-}
+  WiFiClient client = tcpServer.available();
+  if (!client) {
+    delay(10);
+    return;
+  }
 
+  Serial.println("Sender connected, keeping socket open…");
+
+  while (client.connected()) {
+    // 1) read 4-byte length header
+    uint32_t expect = 0;
+    size_t got = 0;
+    while (got < 4 && client.connected()) {
+      int n = client.read(((uint8_t*)&expect) + got, 4 - got);
+      if (n > 0) got += n;
+    }
+    if (got < 4) break;  // peer hung up
+    Serial.printf("Expecting %u bytes…\n", (unsigned)expect);
+
+    // 2) read exactly that many bytes
+    size_t received = 0;
+    while (received < expect && client.connected()) {
+      size_t avail = client.available();
+      size_t toRead = std::min((size_t)(expect - received), avail);
+      if (toRead == 0) continue;
+      int n = client.read(packetBuf + received, toRead);
+      if (n > 0) {
+        received += n;
+        Serial.printf("Got chunk %d bytes, %u/%u\n",
+                      n, (unsigned)received, (unsigned)expect);
+      }
+    }
+    if (received < expect) break;  // connection closed mid-frame
+
+    // 3) process the packet in-place
+    if (strncasecmp((const char*)packetBuf, "IMG", 3) == 0) {
+      Serial.println(F("\n---- BEGIN JPEG HEX DUMP ----"));
+      for (size_t i = 0; i < expect; i++) {
+        Serial.printf("%02X ", packetBuf[i]);
+      }
+      Serial.println();
+      Serial.println(F("----  END JPEG HEX DUMP  ----"));
+    }
+    else if (strncasecmp((const char*)packetBuf, "GPS", 3) == 0) {
+      Serial.println("Received GPS data:");
+      Serial.write(packetBuf, received);
+    }
+    else if (strncasecmp((const char*)packetBuf, "PRX", 3) == 0) {
+      Serial.println("Received proximity data:");
+      Serial.write(packetBuf, received);
+    }
+    Serial.println("Frame done, waiting for next…");
+  }
+
+  Serial.println("Sender disconnected, cleaning up.");
+  client.stop();
+}
