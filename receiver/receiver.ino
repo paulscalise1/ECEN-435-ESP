@@ -7,7 +7,7 @@
 #include <espnow.h>
 #include <TJpg_Decoder.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 static const size_t RX_BUFFER_SIZE = 15 * 1024;
 static uint8_t  packetBuf[RX_BUFFER_SIZE];
