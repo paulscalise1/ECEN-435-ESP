@@ -5,7 +5,7 @@
 #include <ESP8266WiFi.h>
 #include <espnow.h>
 #include <algorithm>
-#include "jpeg_test.h"
+//#include "jpeg_test.h"  // For debugging purposes. Found in ../validation/sender/
 #include "stdbool.h"
 
 #define _inline static inline __attribute__((always_inline))
@@ -15,8 +15,8 @@
 
 static const unsigned      PACKET_GAP_US   = 6000;
 static const size_t        MAX_PACKET_SIZE = 32 * 1024;
-//static uint8_t             packetBuf[MAX_PACKET_SIZE];
-//static size_t              packetLen;
+static uint8_t             packetBuf[MAX_PACKET_SIZE];
+static size_t              packetLen;
 
 // Replace with your receiver’s MAC
 static uint8_t peerAddress[6] = {0x8C, 0xAA, 0xB5, 0x48, 0xF2, 0x1D};
@@ -24,7 +24,6 @@ static uint8_t peerAddress[6] = {0x8C, 0xAA, 0xB5, 0x48, 0xF2, 0x1D};
 static const size_t CHUNK_SIZE = 250;
 
 
-// ----------------------------------------------------------------------------
 void onDataSent(uint8_t *mac_addr, uint8_t status) {
   // optionally ACK back to STM32
   // ESP_UART.write(status);
@@ -112,14 +111,12 @@ void setup() {
 }
 
 void loop() {
-  //if (receivePacket()) {
+  if (receivePacket()) {
     //Serial.printf("Got %3.3s %u bytes\n", packetBuf, (unsigned)packetLen);
-    //if (!
-    
-    sendBufferESPNOW(packetBuf, packetLen); //) //{
-    //  Serial.println(F("*** Send error"));
-    //}
- // }
-    delay(15000);
+    if (!sendBufferESPNOW(packetBuf, packetLen)) {
+      Serial.println(F("*** Send error"));
+    }
+  }
+  //delay(15000);
   yield();
 }
