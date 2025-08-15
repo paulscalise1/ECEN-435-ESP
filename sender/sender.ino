@@ -107,7 +107,7 @@ void setup() {
   ESP_UART.begin(ESP_UART_BAUD);
   while (!ESP_UART);
   ESP_NOW_Init();
-  Serial.println("after init");
+  //Serial.println("after init");
 }
 
 void loop() {

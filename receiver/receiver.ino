@@ -9,9 +9,12 @@
 
 #define DEBUG 0
 
+static const unsigned BAUD = 125000;  // Change this to match your 8051 board !
 static const size_t RX_BUFFER_SIZE = 15 * 1024;
 static uint8_t  packetBuf[RX_BUFFER_SIZE];
 static size_t   packetLen = 0;
+static uint8_t startSequence = 0;
+static const char img[3] = {'I', 'M', 'G'};
 
 
 // Each time this is invoked, it will print 16 by 8 (X x Y) rectangle tile, starting at the top left of the display, moving left to right, top to bottom.
@@ -22,14 +25,33 @@ bool tjpg_render_callback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t
 
   if (DEBUG == 1){
     //Serial.printf("x: %d | y: %d | w: %d | h: %d\n", x, y, w, h);
+    if (startSequence == 1){
+      for (int i = 0; i < 3; i++){
+        Serial.print(img[i], HEX);
+        Serial.print(' ');
+        ESP.wdtFeed();
+      }
+      startSequence = 0;
+    }
     for (uint32_t i = 0; i < (uint32_t)w * h; i++) {
       Serial.print(bitmap[i], HEX);
       Serial.print(' ');
       ESP.wdtFeed();
     }
   } else {
-    for (uint32_t i = 0; i < (uint32_t)w * h; i++) {
-      Serial.print(bitmap[i]);
+    if (startSequence == 1){
+      for (int i = 0; i < 3; i++){
+        Serial.print(img[i]);
+        ESP.wdtFeed();
+      }
+      startSequence = 0;
+    }
+    const size_t nPixels = (size_t)w * h;
+    for (size_t i = 0; i < nPixels; ++i) {
+      uint16_t px = bitmap[i];   // RGB565 pixel
+      // Send big-endian (MSB first)
+      Serial.write(px >> 8);     // high byte
+      Serial.write(px & 0xFF);   // low byte
       ESP.wdtFeed();
     }
   }
@@ -62,6 +84,7 @@ void OnDataRecv(uint8_t *mac, uint8_t *data, uint8_t len) {
   // JPEG frames: start "IMG", end 'FFD9'
   if (packetLen >= 5 && strncasecmp((char*)packetBuf, "IMG", 3) == 0 && packetBuf[packetLen-2] == 0xFF && packetBuf[packetLen-1] == 0xD9) {
     //Serial.printf("\nComplete 'IMG' packet received. Total size: %u bytes.\n", packetLen);
+    startSequence = 1;
     decodeJPEGtoRGB565(packetBuf + 3, packetLen - 3);
     packetLen = 0;
   } else if (packetLen >= 3 && strncasecmp((char*)packetBuf, "GPS", 3) == 0) {  // GPS frames: start "GPS", end '\n'
@@ -91,7 +114,7 @@ void jpeg_decode_init(){
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(BAUD);
   while (!Serial);
   ESP_NOW_Init();
   jpeg_decode_init();
