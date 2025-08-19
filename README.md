@@ -46,6 +46,6 @@ You then must upscale the image from 160x120 to 320x240 in order to fit the LCD 
 
 ### Development and Validation
 
-There are some helpful files and scripts that I have provided in the 'validation' folder for debugging purposes. Check them out to validate output at different stages of development.
+There are some helpful files and scripts that I have so graciously provided in the 'validation' folder for debugging purposes. Check them out to validate output at different stages of development.
 
  
