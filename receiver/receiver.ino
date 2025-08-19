@@ -1,5 +1,6 @@
 // Wi-Fi JPEG/GPS/PRX Receiver Over ESP-NOW v1
 // Outputs a stream of RGB565 in 16x8 tile rowmajor order. (See tjpg_render_callback for more info)
+// *** Record the MAC address of your ESP when flashing. It can be seen in the 'Output' pane during flashing.
 // ECEN 435 University of Nebraska–Lincoln
 // Author: Paul Scalise
 

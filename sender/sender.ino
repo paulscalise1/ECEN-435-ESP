@@ -19,7 +19,7 @@ static uint8_t             packetBuf[MAX_PACKET_SIZE];
 static size_t              packetLen;
 
 // Replace with your receiver’s MAC
-static uint8_t peerAddress[6] = {0x8C, 0xAA, 0xB5, 0x48, 0xF2, 0x1D};
+static uint8_t peerAddress[6] = {0x48, 0x3F, 0xDA, 0x9D, 0x43, 0x6C};
 // ESPNOW v1 max payload per packet
 static const size_t CHUNK_SIZE = 250;
 
@@ -78,7 +78,6 @@ bool sendBufferESPNOW(uint8_t *buf, size_t len) {
     Serial.printf("%02X ", buf[off + i]);
   }
     off += n;
-    //delayMicroseconds(PACKET_GAP_US);
   }
   return true;
 }
@@ -107,16 +106,13 @@ void setup() {
   ESP_UART.begin(ESP_UART_BAUD);
   while (!ESP_UART);
   ESP_NOW_Init();
-  //Serial.println("after init");
 }
 
 void loop() {
   if (receivePacket()) {
-    //Serial.printf("Got %3.3s %u bytes\n", packetBuf, (unsigned)packetLen);
     if (!sendBufferESPNOW(packetBuf, packetLen)) {
       Serial.println(F("*** Send error"));
     }
   }
-  //delay(15000);
   yield();
 }
