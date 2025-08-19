@@ -11,7 +11,9 @@ Clone the repository.
 git clone https://github.com/paulscalise1/ECEN-435-ESP.git
 ```
 
-get 8266 board, install the jpeg library...
+If you do not have the ESP8266 library installed, follow this [tutorial](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/).
+
+Once in Arduino IDE, install the latest version of the ```TJpg_Decoder``` library using the library manager.
 
 ## Code Architecture Breakdown
 
@@ -41,5 +43,9 @@ See the image below.
 You then must upscale the image from 160x120 to 320x240 in order to fit the LCD on your 8051 board, as seen below.
 
 ![upscale](assets/upscale.png)
+
+### Development and Validation
+
+There are some helpful files and scripts that I have provided in the 'validation' folder for debugging purposes. Check them out to validate output at different stages of development.
 
  
