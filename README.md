@@ -36,10 +36,10 @@ The payload of the 160x120 is structured as follows:
 16x8 segments are printed to UART, in row-major order, beginning at the top left of the display, from left to right, top to bottom. The most significant byte of each 16 bit pixel value is printed first, followed by the least significant byte.
 See the image below.
 
-![bitmap](bitmap.png)
+![bitmap](assets/bitmap.png)
 
 You then must upscale the image from 160x120 to 320x240 in order to fit the LCD on your 8051 board, as seen below.
 
-![upscale](upscale.png)
+![upscale](assets/upscale.png)
 
  
