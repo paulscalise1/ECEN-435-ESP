@@ -1,4 +1,4 @@
-// Wi-Fi JPEG/GPS/PRX Receiver Over ESP-NOW v1
+// Wi-Fi JPEG/GPS/TOF Receiver Over ESP-NOW v1
 // Outputs a stream of RGB565 in 16x8 tile rowmajor order. (See tjpg_render_callback for more info)
 // *** Record the MAC address of your ESP when flashing. It can be seen in the 'Output' pane during flashing.
 // ECEN 435 University of Nebraska–Lincoln
@@ -10,7 +10,7 @@
 
 #define DEBUG 0
 
-static const unsigned BAUD = 125000;  // Change this to match your 8051 board !
+static const unsigned BAUD = 125000;  // *** Change this to match your 8051 board !
 static const size_t RX_BUFFER_SIZE = 15 * 1024;
 static uint8_t  packetBuf[RX_BUFFER_SIZE];
 static size_t   packetLen = 0;
@@ -93,7 +93,7 @@ void OnDataRecv(uint8_t *mac, uint8_t *data, uint8_t len) {
       Serial.write(packetBuf, packetLen - 1);
       packetLen = 0;
     }
-  } else if (packetLen >= 3 && strncasecmp((char*)packetBuf, "PRX", 3) == 0) {  // Proximity frames: start "PRX", end '\n'
+  } else if (packetLen >= 3 && strncasecmp((char*)packetBuf, "TOF", 3) == 0) {  // Proximity frames: start "TOF", end '\n'
     if (packetBuf[packetLen-1] == '\n') {
       Serial.write(packetBuf, packetLen - 1);
       packetLen = 0;
@@ -103,7 +103,9 @@ void OnDataRecv(uint8_t *mac, uint8_t *data, uint8_t len) {
 
 void ESP_NOW_Init(){
   WiFi.mode(WIFI_STA);
-  if (esp_now_init() != 0) { ESP.restart(); }
+  if (esp_now_init() != 0){ 
+    ESP.restart();
+  }
   esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
   esp_now_register_recv_cb(OnDataRecv);
 }

@@ -1,4 +1,5 @@
-// Wi-Fi JPEG/GPS/PRX Transmitter Over ESP-NOW v1
+// Wi-Fi JPEG/GPS/TOF Transmitter Over ESP-NOW v1
+// *** Enter your receiver ESP's MAC address into the 'peerAddress' buffer.
 // ECEN 435 University of Nebraska–Lincoln
 // Author: Paul Scalise
 
@@ -54,7 +55,7 @@ bool receivePacket() {
     }
     return false;
   }
-  else if (memcmp(packetBuf, "GPS", 3) == 0 || memcmp(packetBuf, "PRX", 3) == 0) {
+  else if (memcmp(packetBuf, "GPS", 3) == 0 || memcmp(packetBuf, "TOF", 3) == 0) {
     // Read until newline
     while (packetLen < MAX_PACKET_SIZE) {
       if (!ESP_UART.available()) continue;
@@ -74,9 +75,9 @@ bool sendBufferESPNOW(uint8_t *buf, size_t len) {
     if (esp_now_send(peerAddress, (uint8_t*)buf + off, n) != 0) {
       return false;
     }
-       for (size_t i = 0; i < n; ++i) {
-    Serial.printf("%02X ", buf[off + i]);
-  }
+    for (size_t i = 0; i < n; ++i) {
+      Serial.printf("%02X ", buf[off + i]);
+    }
     off += n;
   }
   return true;
