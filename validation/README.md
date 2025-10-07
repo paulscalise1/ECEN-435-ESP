@@ -15,6 +15,8 @@ Prior to running the python script, it is recommended to create a virtual enviro
 For Windows Powershell:
 
 ```powershell
+cd receiver
+
 # Create virtual environment
 python -m venv venv
 
@@ -25,6 +27,8 @@ venv\Scripts\activate
 For macOS/Linux:
 
 ```bash
+cd receiver
+
 # Create virtual environment
 python3 -m venv venv
 
