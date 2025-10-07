@@ -42,7 +42,7 @@ pip install -r requirements.txt
 ```
 
 In the receiver folder there are two files.
-The first contains UART output of example BMP data in debug mode, and you can copy your UART text into that file to test.
+The first contains UART output of example BMP image data in debug mode, and you can copy your UART text into that file to test.
 Once included, run:
 
 ```bash
