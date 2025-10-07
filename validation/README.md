@@ -10,7 +10,7 @@ Change the main code to disregard UART data, and only send the test image.
 
 ## Receiver
 
-Prior to running the python script, it is recommended to create a virtual environment.
+Prior to running the python script, it is recommended to create a virtual environment. Run the following commands depending on your system.
 
 For Windows Powershell:
 
