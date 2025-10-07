@@ -12,7 +12,7 @@ Change the main code to disregard UART data, and only send the test image.
 
 Prior to running the python script, it is recommended to create a virtual environment.
 
-For Windows:
+For Windows Powershell:
 
 ```powershell
 # Create virtual environment
