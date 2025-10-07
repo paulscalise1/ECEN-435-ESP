@@ -11,9 +11,20 @@ Clone the repository.
 git clone https://github.com/paulscalise1/ECEN-435-ESP.git
 ```
 
-If you do not have the ESP8266 library installed, follow this [tutorial](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/).
+Open both .ino files in 'sender' and 'receiver'.
 
 Once in Arduino IDE, install the latest version of the ```TJpg_Decoder``` library using the library manager.
+
+If you do not have the ESP8266 library installed, follow this [tutorial](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/).
+
+In the board selector, choose "Generic ESP8266 Module".
+
+Prior to flashing, set the CPU frequency to 160 MHz under "Tools" in the Arudino menu, seen below:
+
+![cpu freq](assets/cpu.png)
+
+In [sender.ino](sender/sender.ino) you will need to enter the MAC address of your receiver ESP8266. You can obtain this by flashing receiver.ino to your receiver module, and note the MAC that is printed in the "Output" console during flashing.
+
 
 ## Code Architecture Breakdown
 
