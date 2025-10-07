@@ -10,8 +10,35 @@ Change the main code to disregard UART data, and only send the test image.
 
 ## Receiver
 
+Prior to running the python script, it is recommended to create a virtual environment.
+
+For Windows:
+
+```powershell
+# Create virtual environment
+python -m venv venv
+
+# Activate it
+venv\Scripts\activate
+```
+
+For macOS/Linux:
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate
+```
+
+Then install the dependencies once you have activated the venv:
+```bash
+pip install -r requirements.txt
+```
+
 In the receiver folder there are two files.
-The first contains UART output of example BMP data in debug mode, and you can copy your UART text into that file as well to test.
+The first contains UART output of example BMP data in debug mode, and you can copy your UART text into that file to test.
 Once included, run:
 
 ```bash
