@@ -1,6 +1,6 @@
 # Validation
 
-Ensure ```DEBUG``` is set to 1 in both code files for debugging.
+Ensure ```DEBUG``` is set to 1 in ```receiver.ino``` for debugging.
 
 ## Sender
 
@@ -42,11 +42,11 @@ pip install -r requirements.txt
 ```
 
 In the receiver folder there are two files.
-The first contains UART output of example BMP image data in ```DEBUG``` mode, and you can copy your UART text into that file to test.
-Once included, run:
+The first contains UART output of example BMP image data in ```DEBUG``` mode, and once you have received an image, you can copy your output BMP UART text into that file to view the image. **Prior to copying your UART ouput from the receiver ESP, delete the first 3 header bytes: '49' '4D' '47'.**
+Once included, run the python script:
 
 ```bash
 python3 bmp.py
 ```
 
-This will paint the pixels on a canvas in their expected orientation. 
+This will paint the pixels on a canvas in their expected orientation.
