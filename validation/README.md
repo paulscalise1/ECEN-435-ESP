@@ -43,6 +43,7 @@ pip install -r requirements.txt
 
 In the receiver folder there are two files.
 The first contains UART output of example BMP image data in ```DEBUG``` mode, and once you have received an image, you can copy your output BMP UART text into that file to view the image. **Prior to copying your UART ouput from the receiver ESP, delete the first 3 header bytes: '49' '4D' '47'.**
+
 Once included, run the python script:
 
 ```bash
